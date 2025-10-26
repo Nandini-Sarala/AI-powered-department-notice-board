@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Training Notices</title>
+    <link rel="stylesheet" href="css_page.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 min-h-screen flex flex-col items-center">
+    <nav class="bg-gradient-to-r from-red-600 to-orange-600 text-white w-full top-0 z-50 shadow-lg mb-8">
+        <div class="max-w-2xl mx-auto px-4 py-4 flex items-center space-x-4">
+            <h1 class="text-2xl font-semibold tracking-wide">Training Notices</h1>
+        </div>
+    </nav>
+    <main class="w-full max-w-2xl mx-auto px-4">
+        <div class="flex items-center gap-4 mb-4">
+            <input id="trainingSearchInput" type="text" placeholder="Search training notices..."
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500" />
+            <button id="trainingSearchBtn"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Search</button>
+        </div>
+        <ul id="trainingNoticesList" class="space-y-3"></ul>
+    </main>
+    <a href="placement.html" class="mt-8 text-red-700 hover:underline">← Back</a>
+    <script>
+        const trainingNotices = [
+            "Resume Building Workshop Next Week",
+            "Mock Interviews Scheduled for Final Year",
+            "Aptitude Training Sessions Start Monday",
+            "Soft Skills Seminar Registration Open"
+        ];
+        function renderNotices(listId, notices, filter = "") {
+            const list = document.getElementById(listId);
+            list.innerHTML = "";
+            notices
+                .filter(notice => notice.toLowerCase().includes(filter.toLowerCase()))
+                .forEach(notice => {
+                    const li = document.createElement('li');
+                    li.className = "bg-gray-50 rounded p-3 border border-gray-200";
+                    li.textContent = notice;
+                    list.appendChild(li);
+                });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNotices('trainingNoticesList', trainingNotices);
+            document.getElementById('trainingSearchBtn').addEventListener('click', () => {
+                const filter = document.getElementById('trainingSearchInput').value;
+                renderNotices('trainingNoticesList', trainingNotices, filter);
+            });
+            document.getElementById('trainingSearchInput').addEventListener('input', (e) => {
+                renderNotices('trainingNoticesList', trainingNotices, e.target.value);
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+<div class="col-12 col-xxl-4 col-xl-4 col-lg-4 col-md-6 col-sm-6 mt-20">
+    <div class="card-style-list">
+        <h2>General Aptitude</h2>
+        <div class="card-content">
+            <div class="card-icon mdi-chart-donut-variant"></div>
+            <ul>
+                <li><a href="/aptitude/questions-and-answers/">Arithmetic Aptitude</a></li>
+                <li><a href="/data-interpretation/questions-and-answers/">Data Interpretation</a></li>
+                <li><a href="/online-test/aptitude-test/">Online Aptitude Test</a></li>
+                <li><a href="/online-test/data-interpretation-test/">Data Interpretation Test</a></li>
+            </ul>
+
+        </div>
+    </div>
+</div>
