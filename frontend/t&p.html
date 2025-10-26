@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Training & Placement Notices</title>
+    <link rel="stylesheet" href="css_page.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center">
+    <nav class="bg-gradient-to-r from-red-600 to-orange-600 text-white w-full top-0 z-50 shadow-lg mb-8">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center space-x-4">
+            <i class="fas fa-briefcase fa-2x text-white"></i>
+            <h1 class="text-2xl font-semibold tracking-wide">Training & Placement Notices</h1>
+        </div>
+    </nav>
+    <main class="w-full max-w-4xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Training Container -->
+        <section id="trainingContainer" class="bg-white rounded-lg shadow p-6 flex flex-col cursor-pointer group">
+            <h2 class="text-xl font-bold mb-4 text-red-700 select-none">Training</h2>
+            <div id="trainingContent" class="hidden flex-col">
+                <div class="flex items-center gap-4 mb-4">
+                    <input id="trainingSearchInput" type="text" placeholder="Search training notices..."
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500" />
+                    <button id="trainingSearchBtn"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Search</button>
+                </div>
+                <!-- <ul id="trainingNoticesList" class="space-y-3"></ul> -->
+            </div>
+        </section>
+        <!-- Placement Container -->
+        <section id="placementContainer" class="bg-white rounded-lg shadow p-6 flex flex-col cursor-pointer group">
+            <h2 class="text-xl font-bold mb-4 text-orange-700 select-none">Placement</h2>
+            <div id="placementContent" class="hidden flex-col">
+                <div class="flex items-center gap-4 mb-4">
+                    <input id="placementSearchInput" type="text" placeholder="Search placement notices..."
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                    <button id="placementSearchBtn"
+                        class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Search</button>
+                </div>
+                <!-- <ul id="placementNoticesList" class="space-y-3"></ul> -->
+            </div>
+        </section>
+    </main>
+    <a href="home.html" class="mt-8 text-red-700 hover:underline">← Back to Notice Board</a>
+    <script>
+        // Sample data
+        // const trainingNotices = [
+        //     "Resume Building Workshop Next Week",
+        //     "Mock Interviews Scheduled for Final Year",
+        //     "Aptitude Training Sessions Start Monday",
+        //     "Soft Skills Seminar Registration Open"
+        // ];
+        // const placementNotices = [
+        //     "Placement Drive Registration Open",
+        //     "Infosys Campus Drive on 20th September",
+        //     "Internship Opportunities for 3rd Year Students",
+        //     "Capgemini Placement Test Announced"
+        // ];
+
+        // function renderNotices(listId, notices, filter = "") {
+        //     const list = document.getElementById(listId);
+        //     list.innerHTML = "";
+        //     notices
+        //         .filter(notice => notice.toLowerCase().includes(filter.toLowerCase()))
+        //         .forEach(notice => {
+        //             const li = document.createElement('li');
+        //             li.className = "bg-gray-50 rounded p-3 border border-gray-200";
+        //             li.textContent = notice;
+        //             list.appendChild(li);
+        //         });
+        // }
+
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     // Initially hide both contents
+        //     document.getElementById('trainingContent').classList.add('hidden');
+        //     document.getElementById('placementContent').classList.add('hidden');
+
+        //     // Training
+        //     renderNotices('trainingNoticesList', trainingNotices);
+        //     document.getElementById('trainingSearchBtn').addEventListener('click', () => {
+        //         const filter = document.getElementById('trainingSearchInput').value;
+        //         renderNotices('trainingNoticesList', trainingNotices, filter);
+        //     });
+        //     document.getElementById('trainingSearchInput').addEventListener('input', (e) => {
+        //         renderNotices('trainingNoticesList', trainingNotices, e.target.value);
+        //     });
+
+        //     // Placement
+        //     renderNotices('placementNoticesList', placementNotices);
+        //     document.getElementById('placementSearchBtn').addEventListener('click', () => {
+        //         const filter = document.getElementById('placementSearchInput').value;
+        //         renderNotices('placementNoticesList', placementNotices, filter);
+        //     });
+        //     document.getElementById('placementSearchInput').addEventListener('input', (e) => {
+        //         renderNotices('placementNoticesList', placementNotices, e.target.value);
+        //     });
+            
+
+        //     // Toggle logic
+        //     document.getElementById('trainingContainer').addEventListener('click', function (e) {
+        //         // Only toggle if header or container is clicked (not inside content)
+        //         if (e.target.id === 'trainingContainer' || e.target.tagName === 'H2') {
+        //             const content = document.getElementById('trainingContent');
+        //             content.classList.toggle('hidden');
+        //         }
+        //     });
+        //     document.getElementById('placementContainer').addEventListener('click', function (e) {
+        //         if (e.target.id === 'placementContainer' || e.target.tagName === 'H2') {
+        //             const content = document.getElementById('placementContent');
+        //             content.classList.toggle('hidden');
+        //         }
+        //     });
+        // });
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('trainingContainer').addEventListener('click', function () {
+                window.location.href = "training.html";
+            });
+            document.getElementById('placementContainer').addEventListener('click', function () {
+                window.location.href = "placement.html";
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Events Notices</title>
+    <link rel="stylesheet" href="css_page.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+</head>
+
+<body class="bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-gradient-to-r from-green-700 to-blue-700 text-white w-full  shadow-xl ">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center space-x-4">
+            <i class="fas fa-file-alt fa-2x text-white"></i>
+            <h1 class="text-2xl font-bold tracking-wide">Events Notices</h1>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl w-full">
+            <a href="cultural.html" class="block">
+                <div
+                    class="bg-white rounded-3xl shadow-2xl hover:shadow-3xl transition transform hover:-translate-y-2 hover:scale-105 p-10 border border-gray-100 text-center">
+                    <h2 class="text-3xl font-extrabold text-green-700 mb-6">Cultural Events</h2>
+                    <ul id="culturalNotices" class="space-y-3 text-gray-700"></ul>
+                    <p class="text-gray-600 text-lg">Stay tuned for updates on college fests, music shows, art
+                        exhibitions,
+                        and
+                        more!</p>
+                </div>
+            </a>
+
+            <!-- Technical Events Card -->
+            <a href="technical.html" class="block">
+                <div
+                    class="bg-white rounded-3xl shadow-2xl hover:shadow-3xl transition transform hover:-translate-y-2 hover:scale-105 p-10 border border-gray-100 text-center">
+                    <h2 class="text-3xl font-extrabold text-green-700 mb-6">Technical Events</h2>
+                    <ul id="technicalNotices" class="space-y-3 text-gray-700"></ul>
+                    <p class="text-gray-600 text-lg">Get details about hackathons, coding contests, paper presentations,
+                        and
+                        seminars.</p>
+                </div>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Back Link -->
+    <div class="w-full flex justify-center mt-12 mb-8">
+        <a href="home.html" class="text-green-700 font-medium hover:underline text-lg">
+            ← Back to Notice Board
+        </a>
+    </div>
+
+    <script>
+        const noticesList = document.getElementById("noticesList");
+        const searchInput = document.getElementById("searchInput");
+
+        let notices = []; // Will hold cultural notices
+
+        // --- Render Notices ---
+        function renderNotices(filter = "") {
+            noticesList.innerHTML = "";
+
+            const filtered = notices.filter(n =>
+                n.title.toLowerCase().includes(filter.toLowerCase()) ||
+                n.description.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                noticesList.innerHTML = "<p>No notices found.</p>";
+                return;
+            }
+
+            filtered.forEach(n => {
+                const li = document.createElement("li");
+                li.className = "notice-item";
+
+                // li.innerHTML = `
+                //     <div class="notice-text"><strong>${n.title}</strong>: ${n.description}</div>
+                //     <div class="notice-meta">
+                //         <button class="save-btn" data-id="${n._id}">Save</button>
+                //     </div>
+                // `;
+
+                // const saveBtn = li.querySelector(".save-btn");
+                // let savedNotices = JSON.parse(localStorage.getItem("savedNotices")) || [];
+
+                // if (savedNotices.includes(n._id)) {
+                //     saveBtn.classList.add("saved");
+                //     saveBtn.innerText = "Saved";
+                // }
+
+                // saveBtn.addEventListener("click", () => {
+                //     savedNotices = JSON.parse(localStorage.getItem("savedNotices")) || [];
+                //     if (savedNotices.includes(n._id)) {
+                //         savedNotices = savedNotices.filter(id => id !== n._id);
+                //         saveBtn.classList.remove("saved");
+                //         saveBtn.innerText = "Save";
+                //     } else {
+                //         savedNotices.push(n._id);
+                //         saveBtn.classList.add("saved");
+                //         saveBtn.innerText = "Saved";
+                //     }
+                //     localStorage.setItem("savedNotices", JSON.stringify(savedNotices));
+                // });
+
+                li.innerHTML = `<strong>${n.title}</strong>: ${n.description}`;
+
+                noticesList.appendChild(li);
+            });
+        }
+
+        async function loadNotices() {
+            try {
+                const res = await fetch("http://localhost:5000/api/notices/cultural");
+                notices = await res.json();
+                renderNotices();
+            } catch (err) {
+                console.error("Error loading notices:", err);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadNotices);
+
+
+        // --- Load Cultural Notices from backend ---
+        // async function loadNotices() {
+        //     try {
+        //         const res = await fetch("http://localhost:5000/api/notices");
+        //         const allNotices = await res.json();
+
+        //         const homeNotices = allNotices.filter(n => n.category !== "cultural");
+
+        //         const container = document.getElementById("homeNotices");
+        //         container.innerHTML = "";
+
+        //         homeNotices.forEach(n => {
+        //             const li = document.createElement("li");
+        //             li.textContent = `${n.title} - ${n.description}`;
+        //             container.appendChild(li);
+        //         });
+        //     } catch (err) {
+        //         console.error("Failed to load home notices:", err);
+        //         const container = document.getElementById("homeNotices");
+        //         container.innerHTML = "<p>Failed to load notices.</p>";
+        //     }
+        // }
+
+        async function loadCulturalNotices() {
+            try {
+                const res = await fetch("http://localhost:5000/api/notices");
+                const allNotices = await res.json();
+                // notices = allNotices.filter((n) => n.category === "cultural");
+                // renderNotices();
+                // Only cultural category
+                const culturalNotices = allNotices.filter(n => n.category === "cultural");
+
+                const container = document.getElementById("culturalNotices");
+                container.innerHTML = "";
+
+                culturalNotices.forEach(n => {
+                    const li = document.createElement("li");
+                    li.textContent = `${n.title} - ${n.description}`;
+                    container.appendChild(li);
+                });
+            } catch (err) {
+                console.error("Failed to load cultural notices:", err);
+                // noticesList.innerHTML = "<p>Failed to load cultural notices.</p>";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadCulturalNotices);
+
+
+        // Filter only cultural notices
+        //         notices = allNotices.filter(n => n.category === "cultural");
+
+        //         renderNotices(); // Render on page
+        //     } catch (err) {
+        //         console.error("Failed to load notices:", err);
+        //         noticesList.innerHTML = "<p>Failed to load notices.</p>";
+        //     }
+        // }
+        //         const culturalNotices = allNotices.filter(n => n.category === "cultural");
+
+        //         const container = document.getElementById("culturalNotices");
+        //         container.innerHTML = "";
+
+        //         culturalNotices.forEach(n => {
+        //             const li = document.createElement("li");
+        //             li.textContent = `${n.title} - ${n.description}`;
+        //             container.appendChild(li);
+        //         });
+
+        //     } catch (err) {
+        //         console.error("Failed to load notices:", err);
+        //         const container = document.getElementById("culturalNotices");
+        //         container.innerHTML = "<p>Failed to load notices.</p>";
+        //     }
+        // }
+
+        //         // Filter only cultural notices
+        //         notices = allNotices.filter(n => n.category === "cultural");
+
+        //         renderNotices();
+        //     } catch (err) {
+        //         console.error("Failed to load notices:", err);
+        //         noticesList.innerHTML = "<p>Failed to load notices.</p>";
+        //     }
+        // }
+
+        // --- Search filter ---
+        searchInput.addEventListener("input", e => renderNotices(e.target.value));
+
+        // --- Initial load ---
+        document.addEventListener("DOMContentLoaded", loadNotices);
+        // const notices = [
+        //     {
+        //         id: 1,
+        //         text: "Annual Cultural Fest on 15th September.",
+        //         expiry: "2025-09-15",
+        //     },
+        //     {
+        //         id: 2,
+        //         text: "Dance workshop registration closes on 5th October.",
+        //         expiry: "2025-10-05",
+        //     },
+        //     {
+        //         id: 3,
+        //         text: "Painting competition deadline extended to 20th August.",
+        //         expiry: "2025-08-20",
+        //     },
+        //     {
+        //         id: 4,
+        //         text: "Drama club auditions on 1st November.",
+        //         expiry: "2025-11-01",
+        //     },
+        // ];
+
+        // Load saved notices IDs from localStorage
+        // let notices = []
+        // let savedNotices = JSON.parse(localStorage.getItem("savedNotices")) || [];
+
+        // const noticesList = document.getElementById("noticesList");
+        // const searchInput = document.getElementById("searchInput");
+
+        // function isExpired(expiryDate) {
+        //     const today = new Date();
+        //     const expiry = new Date(expiryDate);
+        //     return expiry < today;
+        // }
+
+        // async function loadNotices() {
+        //     const res = await fetch("http://localhost:5000/api/notices");
+        //     let notices = await res.json();
+
+        //     // Only show events category
+        //     notices = notices.filter(n => n.category === "events");
+
+        //     renderNoticesList(notices);
+        // }
+
+        // function renderNotices(noticesToRender, filter = "") {
+        //     noticesList.innerHTML = "";
+
+        //     // Filter notices by search text
+        //     const filtered = noticesToRender.filter((notice) =>
+        //         notice.title.toLowerCase().includes(filter.toLowerCase()) ||
+        //         notice.description.toLowerCase().includes(filter.toLowerCase())
+        //     );
+
+        //     if (filtered.length === 0) {
+        //         noticesList.innerHTML = "<p>No notices found.</p>";
+        //         return;
+        //     }
+
+        //     filtered.forEach(({ _id, title,description }) => {
+        //         // const expired = isExpired(expiry);
+        //         const li = document.createElement("li");
+        //         // li.className = `notice-item${expired ? " expired" : ""}`;
+        //         li.className = "notice-item";
+
+        //         li.innerHTML = `
+        //     <div class="notice-text">${title} - ${description}</div>
+        //     <div class="notice-meta">
+        //         <button class="save-btn ${savedNotices.includes(_id) ? "saved" : ""}" data-id="${_id}">
+        //             ${savedNotices.includes(_id) ? "Saved" : "Save"}
+        //         </button>
+        //     </div>
+        // `;
+
+        //         // Save button toggle logic
+        //         const saveBtn = li.querySelector(".save-btn");
+        //         saveBtn.addEventListener("click", () => {
+        //             if (savedNotices.includes(_id)) {
+        //                 savedNotices = savedNotices.filter((id) => id !== _id);
+        //                 saveBtn.classList.remove("saved");
+        //                 saveBtn.innerText = "Save";
+        //             } else {
+        //                 savedNotices.push(id);
+        //                 saveBtn.classList.add("saved");
+        //                 saveBtn.innerText = "Saved";
+        //             }
+        //             localStorage.setItem("savedNotices", JSON.stringify(savedNotices));
+        //         });
+
+        //         noticesList.appendChild(li);
+        //     });
+        // }
+
+        // // Load notices from backend
+        // async function loadNotices() {
+        //     try {
+        //         const res = await fetch("http://localhost:5000/api/notices"); // backend API
+        //         const allNotices = await res.json();
+
+        //         // Show only cultural/events category
+        //         notices = allNotices.filter((n) => n.category === "cultural");
+
+        //         renderNotices(notices);
+        //     } catch (err) {
+        //         console.error("Error loading notices:", err);
+        //         noticesList.innerHTML = "<p>Failed to load notices.</p>";
+        //     }
+        // }
+
+        // // Search filter
+        // searchInput.addEventListener("input", (e) => {
+        //     renderNotices(notices,e.target.value);
+        // });
+
+        // // --- Initial load ---
+        // document.addEventListener("DOMContentLoaded", () => {
+        //     loadNotices();
+        // });
+
+
+    </script>
+</body>
+
+</html>
