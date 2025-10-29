@@ -240,7 +240,7 @@ def get_recent_notices():
     conn = get_db_connection()
     cursor = get_cursor(conn)
     try:
-        cursor.execute("SELECT id, title, category FROM notices ORDER BY id DESC LIMIT 10")
+        cursor.execute("SELECT id, title, category FROM notices ORDER BY id DESC LIMIT 15")
         notices = cursor.fetchall()
         return jsonify(notices)
     except Exception as e:
