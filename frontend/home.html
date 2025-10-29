@@ -5,9 +5,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Department Notice Board</title>
-  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- <link rel="stylesheet" href="dist/output.css"> -->
+ 
   <link rel="stylesheet" href="homestyle.css">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -18,15 +18,12 @@
   <div id="login-modal" class="modal active">
     <form id="login-form" class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
       <h2 class="text-lg font-bold mb-4">Login</h2>
-      <!-- <input type="email" id="login-email" placeholder="Email" required class="w-full mb-4 p-2 border rounded"> -->
-      <!-- <input type="password" id="login-password" placeholder="Password" required class="w-full mb-4 p-2 border rounded"> -->
+      
       <input type="text" id="login-usn" placeholder="USN (for Students)" required
         class="w-full mb-4 p-2 border rounded">
       <input type="date" id="login-password" placeholder="Password" required class="w-full mb-4 p-2 border rounded">
 
-      <!-- <label class="flex items-center mb-4">
-                <input type="checkbox" id="remember-me" class="mr-2"> Remember Me
-            </label> -->
+     
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Login</button>
 
       <div class="mt-2 text-center">
@@ -43,32 +40,29 @@
   <div id="admin-login-modal" class="modal">
     <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
       <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold text-gray-800">Admin Login</h3>
+        <h3 class="text-xl font-bold text-gray-800">Admin Login</h3></br>
 
-        <h2 class="text-xl font-bold">Welcome Admin!</h2>
+        <!-- <h2 class="text-xl font-bold">Welcome Admin!</h2> -->
         <p>Here you can manage users, timetables, and more.</p>
-        <button onclick="hideAdminLogin()" class="text-gray-500 hover:text-gray-700">
+        
+        <button onclick="showUserLogin()" class="text-gray-500 hover:text-gray-700">
           <i class="fas fa-times text-xl"></i>
         </button>
+
 
       </div>
 
       <form id="admin-login-form">
         <div class="space-y-4">
           <div id="admin-section" class="hidden">
-            <!-- <h2 class="text-xl font-bold">Welcome Admin!</h2>
-            <p>Here you can manage users, timetables, and more.</p> -->
+           
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">admin-username</label>
             <input type="text" id="admin-username" required
               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
           </div>
-          <!-- <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Admin email</label>
-                        <input type="text" id="admin-email" required
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    </div> -->
+         
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -127,7 +121,7 @@
               <!-- Mission -->
               <div>
                 <h3 class="text-xl font-semibold text-green-600 mb-2">Mission</h3>
-                <!-- <ul id="missionContent" class="text-gray-700 space-y-2"> -->
+               
                 <!-- Mission will be inserted here -->
                 <ul class="text-gray-700 space-y-2"> "To impart quality technical education with strong
                   fundamentals."<br>
@@ -139,50 +133,12 @@
 
 
             </div>
-                      
+
           </div>
 
 
-          <!-- Menu Button -->
-          <!-- <div class="relative">
-            <button id="menuButton" aria-label="Menu" class="p-2 rounded-full bg-white/20 hover:bg-white/30 transition">
-              <i class="fas fa-ellipsis-v text-white text-lg"></i>
-            </button>
-
-            <div id="dropdownMenu"
-              class="dropdown-menu absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-              <!-- Profile ->
-              <div class="p-4 border-b border-gray-100 flex flex-col space-y-1">
-                <i class="fas fa-user-circle text-blue-600 w-5"><span>Profile</span></i><br>
-                <!-- <span class="font-semibold text-gray-900" id="profile-name"></span> -->
-          <!-- <span class="text-sm text-gray-500" id="profile-email"></span>->
-                <span class="text-sm text-gray-500" id="profile-usn"></span>
-                <span class="text-sm text-gray-500" id="profile-password"></span>
-              </div>
-             
-              <button
-                onclick="document.getElementById('login-modal').classList.add('active'); setBlurOnMainContent(true);">Login</button>
-            
-              <div class="p-4 border-b border-gray-100 flex flex-col space-y-1">
-                <div class="flex items-center space-x-3">
-                  <i class="fas fa-user-tie text-indigo-600 w-5"></i>
-                  <div>
-                    <span class="font-semibold text-gray-900">Dr.Venkathesh Shankar</span>
-                    <div class="text-xs text-gray-500">HOD, CSE Dept.</div>
-                    <div class="text-xs text-gray-500">hodcse@klsvdit.edu.in</div>
-                  </div>
-                </div>
-              </div>
-              <a href="#" id='visionLink'
-                class="block px-4 py-3 text-gray-700 hover:bg-blue-50 flex items-center space-x-3"><i
-                  class="fas fa-eye text-green-600 w-5"></i><span>Vision & Mission</span></a>
-             
-              <a href="#" class="block px-4 py-3 text-gray-700 hover:bg-red-50 flex items-center space-x-3"><i
-                  class="fas fa-sign-out-alt text-red-600 w-5"></i><span>Logout</span></a>
-            </div>
-          </div>
-        </div>
-      </div> -->
+         
+          
           <div class="relative inline-block text-left">
             <!-- Menu Button -->
             <button id="menuButton" aria-label="Menu"
@@ -227,13 +183,7 @@
                 <span>Vision & Mission</span>
               </a>
 
-              <!-- Login Button -->
-              <!-- <button onclick="document.getElementById('login-modal').classList.add('active'); setBlurOnMainContent(true);"
-      class="w-full text-left px-4 py-3 text-gray-700 hover:bg-blue-50 flex items-center space-x-3 transition">
-      <i class="fas fa-sign-in-alt text-blue-600 w-5"></i>
-      <span>Login</span>
-    </button> -->
-              <!-- "p-4 border-t border-b border-gray-100" -->
+              
 
               <!-- Logout -->
               <a href="#"
@@ -253,21 +203,14 @@
   <section class="slider">
     <div class="slides" id="slides">
       <div class="slide" style="background-image: url('college.jpg')"></div>
-      <div class="slide" style="background-image: url('faculty.jpeg')"></div>
-      <div class="slide" style="background-image: url('hostel.jpeg')"></div>
+      <!-- <div class="slide" style="background-image: url('faculty.jpeg')"></div> -->s
+      <div class="slide" style="background-image: url('facultydept.PNG')"></div>
+      <div class="slide" style="background-image: url('lab1.PNG')"></div>
       <!--<div class="slide" style="background-image: url('vditimg.jpg')"></div>-->
     </div>
 
   </section>
-  <!-- Quote of the Day Section -->
-  <!-- <section class="flex justify-center items-center py-12">
-    <div
-      class="quote-box text-center bg-white/10 border border-white/20 rounded-2xl p-8 max-w-3xl shadow-xl backdrop-blur-md animate-fadeIn">
-      <span class="quote-icon text-5xl text-cyan-400 mb-4 block">❝</span>
-      <p class="quote-text text-lg md:text-xl italic leading-relaxed" id="quote"></p>
-      <p class="quote-author mt-4 font-semibold text-cyan-300" id="author"></p>
-    </div>
-  </section> -->
+  
 
 
   <!-- Recent Notices marquee -->
@@ -401,67 +344,49 @@
   <!-- Add a container for new notices -->
   <ul id="culturalNotices"></ul>
   <!-- Footer -->
-  <footer class="bg-gradient-to-r from-blue-800 via-purple-800 to-indigo-900 text-gray-100 py-10 mt-12">
-    <div class="max-w-6xl mx-auto px-4">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+<footer class="bg-gradient-to-r from-indigo-900 via-purple-800 to-blue-900 text-gray-200 py-6 mt-12 shadow-inner">
+  <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-sm">
 
-        <!-- Logo / Info -->
-        <div class="mb-6 md:mb-0">
-          <h2 class="text-2xl font-bold">KLS VDIT</h2>
-          <p class="mt-1 text-sm text-gray-300">AI-Powered Department Notice Board</p>
-        </div>
+    <!-- 🌟 College Info -->
+    <div class="text-center md:text-left mb-3 md:mb-0">
+      <h2 class="text-xl font-bold text-white">KLS VDIT</h2>
+      <p class="text-gray-300 text-xs italic">AI-Powered Department Notice Board</p>
+    </div>
 
-        <!-- Quick Links -->
-        <div class="flex flex-col md:flex-row md:space-x-8 mb-6 md:mb-0">
-          <a href="faculty.html" class="hover:text-white transition-colors mb-2 md:mb-0">Faculty</a>
-          <a href="events.html" class="hover:text-white transition-colors mb-2 md:mb-0">Events</a>
-          <a href="placement.html" class="hover:text-white transition-colors mb-2 md:mb-0">Placement</a>
-          <a href="calendar.html" class="hover:text-white transition-colors">Calendar</a>
-        </div>
-        <!-- Quick Links replaced with Developed Students names -->
+    <!-- 📞 Contact Info -->
+    <div class="flex flex-col md:flex-row items-center gap-4 text-gray-300 text-xs">
+      <a href="mailto:cse@klsvdit.edu.in" class="flex items-center gap-1 hover:text-white transition">
+        <i class="fas fa-envelope text-purple-300"></i> cse@klsvdit.edu.in
+      </a>
+      <a href="https://klsvdit.edu.in/" target="_blank" class="flex items-center gap-1 hover:text-white transition">
+        <i class="fas fa-globe text-purple-300"></i> www.klsvdit.edu.in
+      </a>
+      <a href="https://klsvdit.edu.in/contact-2/" target="_blank" class="flex items-center gap-1 hover:text-white transition">
+        <i class="fas fa-phone text-purple-300"></i> +91-8332-229785
+      </a>
+    </div>
+
+    <!-- 🎓 Student Credits -->
+    <div class="text-center md:text-right mt-3 md:mt-0 text-gray-300 text-xs leading-relaxed">
+      <p class="font-semibold text-purple-200 mb-1">Project Contributors:</p>
+      <p>
+        Anusha Hukkeri &nbsp;|&nbsp;
+        Kanishka Gurav &nbsp;|&nbsp;
+        Nagaveni Desai &nbsp;|&nbsp;
+        Nandini Sarala
+      </p>
+      <p class="text-gray-400 mt-1">&copy; 2025 KLS VDIT. All Rights Reserved.</p>
+    </div>
+
+  </div>
+</footer>
 
 
-        <!-- Social / Contact -->
-        <div class="flex space-x-4">
-          <a href="mailto:cse@klsvdit.edu.in" class="hover:text-white transition-colors flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m0 0l4 4m0-8l-4 4" />
-            </svg> Email
-          </a>
-          <a href="https://klsvdit.edu.in/" class="hover:text-white transition-colors flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-5M2 7l5 5L22 2" />
-            </svg> Address
-          </a>
-          <a href="https://klsvdit.edu.in/contact-2/0"
-            class="hover:text-white transition-colors flex items-center gap-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 5h2l2 4-2 4H3v-8zm6 2h12v4H9V7z" />
-            </svg> Phone
-          </a>
-        </div>
-      </div>
 
-      <!-- Copyright -->
-      <!-- <div class="mt-8 text-center text-gray-400 text-sm">
-        &copy; 2025 KLS VDIT. All Rights Reserved.
-      </div>
-    </div> class="flex flex-col md:flex-row md:space-x-8 mb-6 md:mb-0-->
-      <div class="mt-8 text-center text-gray-400 text-base md:text-lg font-semibold">
-        <span class="mb-2 md:mb-0">Developed Students:</span>
-        <span class="mb-2 md:mb-0">Anusha Hukkeri |</span>
-        <span class="mb-2 md:mb-0">Kanishka Gurav |</span>
-        <span class="mb-2 md:mb-0">Nagaveni Desai |</span>
-        <span class="mb-2 md:mb-0">Nandini Sarala</span>
-        <!-- Add more names as needed -->
-      </div>
-  </footer>
 
-  <script src="home.js"></script>
+
+
+  <script src="homee.js"></script>
 </body>
 
 </html>

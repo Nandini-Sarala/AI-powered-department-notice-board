@@ -44,10 +44,11 @@ class NoticeInput(BaseModel):
 def predict_category(data: NoticeInput):
     combined_text = f"{data.title} {data.description}".strip()
     text_lower = combined_text.lower()
-    semester = data.semester.strip().lower()
+    semester =(data.semester).strip().lower()
 
     # --- Detect exam/semester keywords ---
     sem_match = re.search(r"sem\s*([1-8])", text_lower)
+    # sem_match = re.search(r"(?:sem\s*|semester\s*)([1-8])", text_lower)
     sem_num = semester if semester else (sem_match.group(1) if sem_match else "")
     if "exam" in text_lower and sem_num.isdigit():
         category = f"exam_sem{sem_num}"
