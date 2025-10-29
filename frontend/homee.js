@@ -1,20 +1,7 @@
-// Dropdown menu toggle
 const menuButton = document.getElementById("menuButton");
 const dropdownMenu = document.getElementById("dropdownMenu");
 
-// menuButton.addEventListener("click", (e) => {
-//     e.stopPropagation();
-//     dropdownMenu.classList.toggle("show");
-// });
 
-// document.addEventListener("click", (e) => {
-//     if (
-//         !menuButton.contains(e.target) &&
-//         !dropdownMenu.contains(e.target)
-//     ) {
-//         dropdownMenu.classList.remove("show");
-//     }
-// });
 menuButton.addEventListener("click", (e) => {
     e.stopPropagation();
     dropdownMenu.classList.toggle("hidden");
@@ -90,45 +77,44 @@ visionModal.addEventListener('click', (e) => {
     }
 });
 
-// Show blur when login modal is active
 document.addEventListener('DOMContentLoaded', function () {
-    // sessionStorage.removeItem('currentUser');
-    // sessionStorage.removeItem('isAdmin');
     const savedUser = localStorage.getItem('user');
-    setBlurOnMainContent(true);
+    const isAdmin = localStorage.getItem('isAdmin') === "true";
+    const loginModal = document.getElementById('login-modal');
+    const adminModal = document.getElementById('admin-login-modal');
+    const adminSection = document.getElementById('admin-section');
+    updateNoticeButtonVisibility();
+
     if (savedUser) {
-
-        //setBlurOnMainContent(true);
         const user = JSON.parse(savedUser);
-        //document.getElementById('profile-name').textContent = user.name ? `Name: ${user.name}` : '';
-        //document.getElementById('profile-email').textContent = user.email ? `Email: ${user.email}` : '';
-        document.getElementById('profile-usn').textContent = user.usn ? `USN: ${user.usn}` : '';
-        //document.getElementById('profile-password').textContent = user.password ? `Password: ${user.password}` : '';
-        // ✅ Hide login modal & remove blur if user is logged in
-        document.getElementById('login-modal').classList.remove('active');
-        setBlurOnMainContent(false);
-    }
-    else {
-        document.getElementById('login-modal').classList.add('active')
-        setBlurOnMainContent(true);
+        document.getElementById('profile-usn').textContent = user.usn ? `User: ${user.usn}` : '';
 
+        // Hide all login modals
+        loginModal.classList.add('hidden');
+        loginModal.classList.remove('active');
+        adminModal.classList.add('hidden');
+        adminModal.classList.remove('active');
+        setBlurOnMainContent(false);
+
+        if (isAdmin) {
+            adminSection.classList.remove('hidden');
+            console.log("✅ Admin session restored");
+        } else {
+            adminSection.classList.add('hidden');
+            console.log("✅ Student session restored");
+        }
+    } else {
+        // No saved user → show login
+        loginModal.classList.add('active');
+        setBlurOnMainContent(true);
     }
-    // Listen for login form submit
-    // Handle user login
-    document.getElementById('login-form').addEventListener('submit', async function (e) {
+
+    // 🧩 User login form
+    const loginForm = document.getElementById('login-form');
+    loginForm?.addEventListener('submit', async function (e) {
         e.preventDefault();
         const usn = document.getElementById('login-usn').value;
-        //const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
-        //const rememberMe = document.getElementById('remember-me').checked;
-        //const name = email.split('@')[0]; // Example: use part before @ as name
-
-        // console.log("➡ Sending:", { usn, password });
-
-        // // Set profile info
-        // document.getElementById('profile-name').textContent = name ? `Name: ${name}` : '';
-        // document.getElementById('profile-email').textContent = email ? `Email: ${email}` : '';
-        // document.getElementById('profile-usn').textContent = usn ? `USN: ${usn}` : '';
 
         const res = await fetch('http://localhost:5000/login', {
             method: 'POST',
@@ -137,84 +123,143 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         const data = await res.json();
-        //console.log('⬅️ Server responded:', res.status, data);
-        // if (!res.ok) {
-        //  alert('Error: ' + (data.error || 'Login failed'));
-        //  return;
-        // }
+
         if (data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('isAdmin', data.user.isAdmin ? "true" : "false");
 
-            localStorage.setItem('user', JSON.stringify({
-                usn: data.user.usn,
-                password: data.user.password,
-                isAdmin: data.user.isAdmin   // 🔑 store role
-
-            }));
-
-            showNotification("Login successful!", "success");
             handleLoginSuccess(data.user, data.user.isAdmin);
-            document.getElementById('login-modal').classList.remove('active');
+            loginModal.classList.remove('active');
+            loginModal.classList.add('hidden');
             setBlurOnMainContent(false);
-
-            document.getElementById('profile-usn').textContent = data.user.usn ? `USN: ${data.user.usn}` : '';
-            //document.getElementById('profile-password').textContent = data.user.password ? `Password: ${data.user.password}` : '';
-            updateNoticeButtonVisibility();   // ✅ add here
+            document.getElementById('profile-usn').textContent = `USN: ${data.user.usn}`;
+            updateNoticeButtonVisibility();
+            showNotification("Login successful!", "success");
         } else {
-            //showNotification(data.error, "error");
             alert(data.error || 'Login failed');
         }
-
     });
-});
-function handleLoginSuccess(user, isAdmin = false) {
-    try {
-        // Always store in localStorage (persistent login)
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        localStorage.setItem('isAdmin', isAdmin ? "true" : "false");
 
-        // Optional: update UI after login
-        updateUIAfterLogin(user);
+    // 🧩 Admin login form
+    const adminLoginForm = document.getElementById('admin-login-form');
+    adminLoginForm?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const usn = document.getElementById('admin-username').value;
+        const password = document.getElementById('admin-password').value;
 
-    } catch (err) {
-        console.error("Error handling login success:", err);
-    }
-}
-function updateUIAfterLogin(user) {
-    const welcomeMsg = document.getElementById('welcome-msg');
-    if (welcomeMsg) {
-        welcomeMsg.innerText = `Welcome, ${user.name || user.email}`;
-    }
+        const res = await fetch('http://localhost:5000/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usn, password })
+        });
+        const data = await res.json();
 
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.classList.remove('hidden');
-    }
-}
-document.addEventListener('DOMContentLoaded', function () {
-    // Logout functionality
-    const logoutBtn = document.querySelector('.fa-sign-out-alt').parentElement;
-    logoutBtn.addEventListener('click', function (e) {
+        if (data.user && data.user.isAdmin) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('isAdmin', "true");
+            handleLoginSuccess(data.user, true);
+            adminModal.classList.remove('active');
+            adminModal.classList.add('hidden');
+            loginModal.classList.add('hidden');
+            setBlurOnMainContent(false);
+            adminSection.classList.remove('hidden');
+            document.getElementById('profile-usn').textContent = `USN: ${data.user.usn}`;
+            updateNoticeButtonVisibility();
+            showNotification("Admin login successful!", "success");
+        } else {
+            alert("❌ You are not an admin!");
+        }
+    });
+
+    // 🧩 Admin login button (switch from user → admin modal)
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    adminLoginBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAdminLogin();
+    });
+
+    // 🧩 Logout button
+    const logoutBtn = document.querySelector('.fa-sign-out-alt')?.parentElement;
+    logoutBtn?.addEventListener('click', function (e) {
         e.preventDefault();
         localStorage.removeItem('user');
         localStorage.removeItem('isAdmin');
-        // Clear profile info
-        //document.getElementById('profile-name').textContent = '';
-        //document.getElementById('profile-email').textContent = '';
         document.getElementById('profile-usn').textContent = '';
-        document.getElementById('profile-password').textContent = '';
-        setBlurOnMainContent(true);
-        // Show login modal
+        adminSection.classList.add('hidden');
+        document.getElementById('login-modal').classList.remove('hidden');
         document.getElementById('login-modal').classList.add('active');
-        // Clear login form fields
-        //document.getElementById('login-email').value = '';
+        setBlurOnMainContent(true);
         document.getElementById('login-password').value = '';
         document.getElementById('login-usn').value = '';
-        // Optionally, hide dropdown menu if needed
-        //document.getElementById('dropdownMenu').style.display = 'none';
         showNotification("Logout successful!", "success");
-        updateNoticeButtonVisibility();   // ✅ add here
+        updateNoticeButtonVisibility();
     });
 });
+
+// ✅ Helper functions
+function handleLoginSuccess(user, isAdmin = false) {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    localStorage.setItem('isAdmin', isAdmin ? "true" : "false");
+    updateUIAfterLogin(user);
+}
+
+function updateUIAfterLogin(user) {
+    const welcomeMsg = document.getElementById('welcome-msg');
+    if (welcomeMsg) welcomeMsg.innerText = `Welcome, ${user.name || user.usn}`;
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
+}
+
+function showAdminLogin() {
+    const adminModal = document.getElementById('admin-login-modal');
+    const userModal = document.getElementById('login-modal');
+    adminModal?.classList.remove('hidden');
+    adminModal?.classList.add('active');
+    userModal?.classList.add('hidden');
+    userModal?.classList.remove('active');
+    setBlurOnMainContent(true);
+}
+
+function showUserLogin() {
+    const adminModal = document.getElementById('admin-login-modal');
+    const userModal = document.getElementById('login-modal');
+    adminModal?.classList.add('hidden');
+    adminModal?.classList.remove('active');
+    userModal?.classList.remove('hidden');
+    userModal?.classList.add('active');
+    setBlurOnMainContent(true);
+}
+
+function hideAdminLogin() {
+    const adminModal = document.getElementById('admin-login-modal');
+    const userModal = document.getElementById('login-modal');
+    adminModal?.classList.add('hidden');
+    adminModal?.classList.remove('active');
+    userModal?.classList.add('hidden');
+    userModal?.classList.remove('active');
+    setBlurOnMainContent(false);
+}
+function setBlurOnMainContent(blur) {
+    const main = document.getElementById('main-content'); // body wrapper
+    const nav = document.querySelector('nav');  // navbar
+    if (!main || !nav) return; // safety check
+
+    if (blur) {
+        main.classList.add('blur-bg');
+        nav.classList.add('blur-bg');
+
+    } else {
+        main.classList.remove('blur-bg');
+        nav.classList.remove('blur-bg');
+    }
+    const blurOverlay = document.getElementById('blur-overlay');
+    if (!blurOverlay) return;
+    if (blur) {
+        blurOverlay.classList.remove('hidden');
+    } else {
+        blurOverlay.classList.add('hidden');
+    }
+}
 function showNotification(message, type = 'info', duration = 3000) {
     const notification = document.createElement('div');
     notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${type === 'success' ? 'bg-green-500 text-white' :
@@ -240,136 +285,6 @@ function showNotification(message, type = 'info', duration = 3000) {
         }
     }, duration);
 }
-
-
-function setBlurOnMainContent(blur) {
-    const main = document.getElementById('main-content'); // body wrapper
-    const nav = document.querySelector('nav');  // navbar
-    if (!main || !nav) return; // safety check
-
-    if (blur) {
-        main.classList.add('blur-bg');
-        nav.classList.add('blur-bg');
-
-    } else {
-        main.classList.remove('blur-bg');
-        nav.classList.remove('blur-bg');
-    }
-    const blurOverlay = document.getElementById('blur-overlay');
-    if (!blurOverlay) return;
-    if (blur) {
-        blurOverlay.classList.remove('hidden');
-    } else {
-        blurOverlay.classList.add('hidden');
-    }
-}
-
-function showAdminLogin() {
-    // document.getElementById('admin-login-modal').classList.add('active');
-    // document.getElementById('login-modal').classList.remove('active');
-    const adminModal = document.getElementById('admin-login-modal');
-    const userModal = document.getElementById('login-modal');
-
-    // Show admin modal
-    if (adminModal) {
-        adminModal.classList.remove('hidden');
-        adminModal.classList.add('active');
-    }
-
-    // Hide user modal
-    if (userModal) {
-        userModal.classList.add('hidden'); // hide user login
-        userModal.classList.remove('active');
-    }
-    setBlurOnMainContent(true);
-}
-function hideAdminLogin() {
-    const adminModal = document.getElementById('admin-login-modal');
-    //const userModal = document.getElementById('login-modal');
-
-    if (adminModal) {
-        adminModal.classList.add('hidden');    // hide admin modal
-        adminModal.classList.remove('active');
-    }
-
-    // if (userModal) {
-    //     userModal.classList.remove('hidden');  // optionally show normal login
-    //     userModal.classList.add('active');
-    // }
-
-    setBlurOnMainContent(false);  // remove blur from main content
-}
-// Show blur when login modal is active
-document.addEventListener('DOMContentLoaded', function () {
-    // sessionStorage.removeItem('currentUser');
-    // sessionStorage.removeItem('isAdmin');
-    const savedUser = localStorage.getItem('user');
-    const isAdmin = localStorage.getItem('isAdmin') === "true";
-    //setBlurOnMainContent(true);
-    if (savedUser && isAdmin) {
-        document.getElementById('admin-section').classList.remove('hidden');
-        hideAdminLogin();
-        // setBlurOnMainContent(false);
-
-        // //setBlurOnMainContent(true);
-        const user = JSON.parse(savedUser);
-
-    }
-    else {
-        document.getElementById('admin-section').classList.add('hidden');
-        //showAdminLogin();
-    }
-    //document.addEventListener('DOMContentLoaded', function () {
-    const adminLoginForm = document.getElementById('admin-login-form');
-    if (adminLoginForm) {
-        adminLoginForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const usn = document.getElementById('admin-username').value;
-            const password = document.getElementById('admin-password').value;
-
-            // console.log("➡ Sending Admin Login:", { usn, password });
-
-            const res = await fetch('http://localhost:5000/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usn, password })
-            });
-
-            const data = await res.json();
-
-            if (data.user && data.user.isAdmin) {
-                // if (data.user.isAdmin) {
-                localStorage.setItem('user', JSON.stringify(data.user));
-                localStorage.setItem('isAdmin', "true");
-
-                showNotification("Admin login successful!", "success");
-                // Hide admin modal
-                hideAdminLogin();
-                document.getElementById('admin-section').classList.remove('hidden');
-                document.getElementById('profile-usn').textContent = data.user.usn
-                    ? `USN: ${data.user.usn}`
-                    : '';
-                updateNoticeButtonVisibility();   // ✅ add here
-            } else {
-                alert("❌ You are not an admin!");
-            }
-            //  } else {
-            //   alert(data.error || "Admin login failed");
-            //  }
-        });
-    }
-    // ✅ Add trigger for "Login as Admin" button/link
-    const adminLoginBtn = document.getElementById('adminLoginBtn');
-    if (adminLoginBtn) {
-        adminLoginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            showAdminLogin();
-        });
-    }
-});
-
-
-
 function updateNoticeButtonVisibility() {
     const addNoticeBtn = document.getElementById("addNoticeBtn");
     if (!addNoticeBtn) return;
@@ -382,8 +297,6 @@ function updateNoticeButtonVisibility() {
         addNoticeBtn.style.display = "none";    // hide for student/guest
     }
 }
-
-// ---------------- Add Notice Modal ----------------
 document.addEventListener("DOMContentLoaded", () => {
     const addNoticeBtn = document.getElementById("addNoticeBtn");
     const addNoticeModal = document.getElementById("addNoticeModal");
@@ -460,15 +373,20 @@ document.addEventListener("DOMContentLoaded", () => {
             if (saveData.success) {
                 alert(`Notice added successfully under category: ${predictedCategory}`);
                 //  appendNoticeToDOM(saveData.notice);
-                if (predictedCategory === "placement") {
-                    loadPlacementImages();
+                try{
+               if (predictedCategory === "placement") {
+                    await loadPlacementImages();
+                    //loadNotices();
                 }
                 else if (predictedCategory === "achievements") {
-                    appendAchievementToDOM(saveData.notice);
+                    appendNoticeToDOM(saveData.notice);
                 }
                 else {
                     appendNoticeToDOM(saveData.notice);
                 }
+            }catch(rendeerErr){
+                console.error("Error rendering new notice:", rendeerErr);
+            }
                 addNoticeModal.classList.add("hidden");
                 document.getElementById("noticeTitle").value = "";
                 document.getElementById("noticeDescription").value = "";
@@ -551,40 +469,68 @@ function appendNoticeToDOM(notice) {
 // ---------------- Load Notices from Backend ----------------
 async function loadNotices() {
     const categories = ["technical", "exam", "workshop", "faculty", "placement", "general"];
-    for (let cat of categories) {
+    const noticeList = document.getElementById("noticeList");
+
+    // 🧹 Clear old notices before reloading
+    noticeList.innerHTML = "";
+
+    for (const cat of categories) {
         try {
             const res = await fetch(`http://127.0.0.1:5000/api/notices/${cat}`);
+
+            // Ensure backend responded correctly
+            if (!res.ok) {
+                console.error(`❌ Failed to fetch ${cat} notices. Status:`, res.status);
+                continue;
+            }
+
             const notices = await res.json();
-            if (Array.isArray(notices)) {
+            if (Array.isArray(notices) && notices.length > 0) {
+                // Optional: category header
+                const catHeader = document.createElement("h3");
+                catHeader.textContent = cat.toUpperCase();
+                catHeader.classList.add("text-xl", "font-bold", "mt-4", "mb-2");
+                noticeList.appendChild(catHeader);
+
                 notices.forEach(appendNoticeToDOM);
             }
         } catch (err) {
-            console.error("Error loading notices for category", cat, err);
+            console.error(`⚠ Error loading notices for category "${cat}":`, err);
         }
     }
 }
 
 document.addEventListener("DOMContentLoaded", loadNotices);
+
+
+
+async function cleanupExpiredNoticesFromBackend() {
+    try {
+        const res = await fetch("http://127.0.0.1:5000/api/cleanup_expired", {
+            method: "DELETE",
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            console.log(`🧹 Deleted ${data.deleted} expired notices from DB`);
+        } else {
+            console.warn("⚠ Cleanup failed:", data.error);
+        }
+    } catch (err) {
+        console.error("Error cleaning up expired notices:", err);
+    }
+}
+
 function removeExpiredNotices() {
     const now = new Date();
-
-    // Select all notices with expiry date displayed
     document.querySelectorAll("li").forEach((li) => {
         const expiryEl = li.querySelector("div.text-red-600");
         if (expiryEl) {
             const expiryDate = new Date(expiryEl.textContent.replace("Expires on: ", ""));
-            if (expiryDate < now) {
-                li.remove();
-            }
+            if (expiryDate < now) li.remove();
         }
     });
 }
-
-// Run once on page load
-document.addEventListener("DOMContentLoaded", removeExpiredNotices);
-
-// Optional: check every minute
-setInterval(removeExpiredNotices, 60000);
 
 async function loadRecentNotices() {
     const container = document.getElementById("recentNotices");
@@ -599,32 +545,23 @@ async function loadRecentNotices() {
             return;
         }
 
-        // Build clickable notices
         container.innerHTML = notices.map(notice => {
-            // Decide target page based on category
             let link = "#";
-            // if (notice.category.startsWith("exam")) link = "exam_schedule.html";
             if (notice.category.startsWith("exam")) {
-                // Extract semester number (like exam_sem5)
                 const match = notice.category.match(/exam[_\s]*sem(\d)/i);
                 const semKey = match ? `sem${match[1]}` : "";
-
-                // Detect IA vs Semester from text
                 const lowerTitle = notice.title.toLowerCase();
                 const type = /ia|internal/.test(lowerTitle) ? "ia" : "sem";
-
                 link = `exam_schedule.html?sem=${semKey}&type=${type}`;
-            }
-
-            else if (notice.category === "technical") link = "technical.html";
+            } else if (notice.category === "technical") link = "technical.html";
             else if (notice.category === "cultural") link = "cultural.html";
             else link = "general.html";
 
             return `
-        <a href="${link}" class="hover:underline text-blue-700">
-          🔔 ${notice.title}
-        </a>&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;
-      `;
+                <a href="${link}" class="hover:underline text-blue-700">
+                    🔔 ${notice.title}
+                </a>&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;
+            `;
         }).join("");
     } catch (err) {
         console.error("Error loading notices:", err);
@@ -632,12 +569,17 @@ async function loadRecentNotices() {
     }
 }
 
-// Load on page load
-loadRecentNotices();
 
-// Optional: Refresh every minute so deleted/added notices auto-update
-setInterval(loadRecentNotices, 60000);
+// ✅ Run everything once when page loads
+document.addEventListener("DOMContentLoaded", async () => {
+    await cleanupExpiredNoticesFromBackend();
+    await loadRecentNotices();
+    removeExpiredNotices();
+});
 
-
-
-
+// 🔁 Optional: repeat cleanup + reload every minute
+setInterval(async () => {
+    await cleanupExpiredNoticesFromBackend();
+    await loadRecentNotices();
+    removeExpiredNotices();
+}, 60000);

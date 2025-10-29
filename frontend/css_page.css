@@ -78,28 +78,4 @@
       transform: translateY(-5px);
       transition: all 0.3s ease;
     }
-    /* .flier-marquee-container {
-    overflow: hidden;
-    width: 100%;
-    background: #e0e7ff; /* indigo-100 
-    padding: 1rem 0;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 8px #0001;
-  }
-  .flier-marquee-content {
-    display: flex;
-    align-items: center;
-    gap: 3rem;
-    animation: flier-marquee 18s linear infinite;
-  }
-  @keyframes flier-marquee {
-    0% { transform: translateX(100%);}
-    100% { transform: translateX(-100%);}
-  }
-  .flier-marquee-content img {
-    height: 96px; /* h-24 
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 8px #0002;
-    background: #fff;
-    padding: 0.25rem;
-  } */
+  
