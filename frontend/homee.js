@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const usn = document.getElementById('login-usn').value;
         const password = document.getElementById('login-password').value;
 
-        const res = await fetch('http://localhost:5000/login', {
+        const res = await fetch('http://127.0.0.1:5000/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usn, password })
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const usn = document.getElementById('admin-username').value;
         const password = document.getElementById('admin-password').value;
 
-        const res = await fetch('http://localhost:5000/login', {
+        const res = await fetch('http://127.0.0.1:5000/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ usn, password })
