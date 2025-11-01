@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 min-h-screen flex flex-col items-center">
 
   <h1 class="text-4xl font-bold text-green-700 mt-8 mb-6">Cultural Notices</h1>
@@ -46,5 +48,41 @@
     }
     document.addEventListener("DOMContentLoaded", loadCulturalNotices);
   </script>
+  <!-- <script>
+    async function loadCulturalNotices() {
+      try {
+        const res = await fetch("http://localhost:5000/api/notices");
+        const allNotices = await res.json();
+
+        const culturalNotices = allNotices.filter(n => n.category === "cultural");
+        const technicalNotices = allNotices.filter(n => n.category === "technical");
+
+        const culturalContainer = document.getElementById("culturalNotices");
+        const technicalContainer = document.getElementById("technicalNotices");
+
+        culturalContainer.innerHTML = "";
+        technicalContainer.innerHTML = "";
+
+        culturalNotices.forEach(n => {
+          const li = document.createElement("li");
+          li.textContent = `${n.title} - ${n.description}`;
+          culturalContainer.appendChild(li);
+        });
+
+        technicalNotices.forEach(n => {
+          const li = document.createElement("li");
+          li.textContent = `${n.title} - ${n.description}`;
+          technicalContainer.appendChild(li);
+        });
+
+      } catch (err) {
+        console.error("Failed to load notices:", err);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadCulturalNotices);
+  </script> -->
+
 </body>
+
 </html>
