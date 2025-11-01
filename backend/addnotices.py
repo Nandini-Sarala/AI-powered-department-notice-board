@@ -116,73 +116,61 @@ def add_notice():
         if category == "placement" and not image_url:
             return jsonify({"success": False, "error": "Placement notice must include an image."}), 400
 
-        # # --- Check for existing notice ---
-        # cursor.execute(
-        #     "SELECT id, image_url FROM notices WHERE category = %s AND semester = %s",
-        #     (category, semester)
-        # )
-        # existing = cursor.fetchone()
+       
+        if category.startswith("exam"):
+            # if semester:
+            #    category = f"{category}{semester}"
+            cursor.execute(
+                """
+                SELECT id, category, image_url 
+                FROM notices 
+                WHERE category = %s
+                """,
+                (category,)
+            )
+            existing_exam = cursor.fetchone()
 
-        # if existing:
-        #     # --- Update existing notice ---
-        #     update_query = """
-        #         UPDATE notices
-        #         SET title = %s, description = %s, expiry_date = %s, image_url = %s
-        #         WHERE id = %s
-        #     """
-        #     cursor.execute(update_query, (
-        #         title, description, expiry_date,
-        #         image_url or existing["image_url"], existing["id"]
-        #     ))
-        #     conn.commit()
-        #     notice_id = existing["id"]
-        #     message = f"Notice updated successfully for category: {category}"
-        # else:
-        #     # --- Insert new notice ---
-        #     cursor.execute(
-        #         "INSERT INTO notices (title, description, category, semester, image_url, expiry_date) VALUES (%s, %s, %s, %s, %s, %s)",
-        #         (title, description, category, semester, image_url, expiry_date)
-        #     )
-        #     conn.commit()
-        #     notice_id = cursor.lastrowid
-        #     message = f"Notice added successfully under category: {category}"
-        # --- Check for existing notice ---
-        cursor.execute(
-            "SELECT id, image_url, category FROM notices WHERE semester = %s AND category LIKE 'exam%%'",
-            (semester,)
-        )
-        existing = cursor.fetchone()
-
-        if existing:
-        # Only replace if existing category is 'exam' related
-           if existing["category"].startswith("exam"):
-              update_query = """
-                 UPDATE notices
-                 SET title = %s, description = %s, expiry_date = %s, image_url = %s, category = %s
-                 WHERE id = %s
-             """
-              cursor.execute(update_query, (
-                 title, description, expiry_date,
-                 image_url or existing["image_url"], category, existing["id"]
-              ))
-              conn.commit()
-              notice_id = existing["id"]
-              message = f"Exam notice updated successfully for semester: {semester}"
-           else:
-        # Don’t overwrite non-exam categories
-              message = f"Notice already exists for semester {semester} (category: {existing['category']}); not replaced."
-              notice_id = existing["id"]
+            if existing_exam:
+                # Update existing IA/SEM exam notice for that semester
+                update_query = """
+                    UPDATE notices
+                    SET title = %s, description = %s, expiry_date = %s, image_url = %s
+                    WHERE id = %s
+                """
+                cursor.execute(update_query, (
+                    title, description, expiry_date,
+                    image_url or existing_exam["image_url"], existing_exam["id"]
+                ))
+                conn.commit()
+                notice_id = existing_exam["id"]
+                message = f"Updated existing {category} notice for semester {semester}"
+            else:
+                # No existing exam notice of that type → Insert new
+                cursor.execute(
+                    """
+                    INSERT INTO notices 
+                    (title, description, category, semester, image_url, expiry_date)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    """,
+                    (title, description, category, semester, image_url, expiry_date)
+                )
+                conn.commit()
+                notice_id = cursor.lastrowid
+                message = f"Added new {category} notice for semester {semester}"
         else:
-       # --- Insert new notice ---
-           cursor.execute(
-               "INSERT INTO notices (title, description, category, semester, image_url, expiry_date) VALUES (%s, %s, %s, %s, %s, %s)",
-               (title, description, category, semester, image_url, expiry_date)
-           )
-        conn.commit()
-        notice_id = cursor.lastrowid
-        message = f"New notice added under category: {category}"
-
-        
+            # Non-exam categories → always insert new, don’t replace
+            cursor.execute(
+                """
+                INSERT INTO notices 
+                (title, description, category, semester, image_url, expiry_date)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                (title, description, category, semester, image_url, expiry_date)
+            )
+            conn.commit()
+            notice_id = cursor.lastrowid
+            message = f"Added new notice under category: {category}"
+   
 
         notice = {
             "id": notice_id,

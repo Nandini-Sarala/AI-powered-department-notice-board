@@ -134,18 +134,52 @@
         let currentSemesterKey = "";
 
 
+
+        // async function loadExamNoticesForSemester(semKey) {
+        //     //semKey like "sem3"
+        //     const possibleCats = [`exam_${semKey}`, `exam_iasem${semKey.replace("sem", "")}`, `exam_semsem${semKey.replace("sem", "")}`];
+        //     let notices = [];
+
+        //     for (const cat of possibleCats) {
+        //         try {
+        //             const res = await fetch(`http://127.0.0.1:5000/api/notices/${cat}`);
+        //             const data = await res.json();
+        //             if (Array.isArray(data) && data.length) {
+        //                 notices = data;
+        //                 break;
+        //             }
+        //         } catch (err) {
+        //             console.error("Error fetching", cat, err);
+        //         }
+        //     }
+
+        //     return notices;
+        // }
         async function loadExamNoticesForSemester(semKey) {
-            // semKey is like "sem3"
-            const cat = `exam_${semKey}`; // -> "exam_sem3"
-            try {
-                const res = await fetch(`http://127.0.0.1:5000/api/notices/${cat}`);
-                const notices = await res.json();
-                return Array.isArray(notices) ? notices : [];
-            } catch (err) {
-                console.error("Error loading exam notices:", err);
-                return [];
+            const possibleCats = [
+                `exam_${semKey}`,
+                `exam_iasem${semKey.replace("sem", "")}`,
+                `exam_semsem${semKey.replace("sem", "")}`
+            ];
+            let notices = [];
+
+            for (const cat of possibleCats) {
+                try {
+                    const res = await fetch(`http://127.0.0.1:5000/api/notices/${cat}`);
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length) {
+                        notices = notices.concat(data); // collect all
+                    }
+                } catch (err) {
+                    console.error("Error fetching", cat, err);
+                }
             }
+
+            return notices;
         }
+
+
+
 
         document.querySelectorAll(".semester-box").forEach(box => {
             box.addEventListener("click", async () => {
@@ -157,6 +191,7 @@
                 modal.classList.remove("hidden");
 
                 const notices = await loadExamNoticesForSemester(semKey);
+                console.log("Fetched notices for", semKey, notices);
 
                 if (!notices.length) {
                     currentSemIA = null;
@@ -165,13 +200,24 @@
                     alert("No timetable uploaded yet for this semester.");
                     return;
                 }
-                // Separate IA and SEM timetables based on description/title
+                // // Separate IA and SEM timetables based on description/title
+                // currentSemIA = notices.find(n =>
+                //     /(ia|internal|internal assessment)/i.test(n.title + " " + n.description)
+                // );
+                // currentSemSem = notices.find(n =>
+                //     /(semester|end exam|final)/i.test(n.title + " " + n.description)
+                // );
+                // Separate IA and SEM timetables based on description/title or category
                 currentSemIA = notices.find(n =>
+                    /exam_ia/.test(n.category || "") ||
                     /(ia|internal|internal assessment)/i.test(n.title + " " + n.description)
                 );
+
                 currentSemSem = notices.find(n =>
+                    /exam_sem/.test(n.category || "") ||
                     /(semester|end exam|final)/i.test(n.title + " " + n.description)
                 );
+
 
 
             });
