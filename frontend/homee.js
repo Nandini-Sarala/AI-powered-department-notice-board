@@ -555,7 +555,9 @@ async function loadRecentNotices() {
                 link = `exam_schedule.html?sem=${semKey}&type=${type}`;
             } else if (notice.category === "technical") link = "technical.html";
             else if (notice.category === "cultural") link = "cultural.html";
-            else link = "general.html";
+            else if (notice.category === "achievements") link = "achievements.html";
+            else if (notice.category === "placement") link = "placement.html";
+            // else link = "general.html";
 
             return `
                 <a href="${link}" class="hover:underline text-blue-700">
