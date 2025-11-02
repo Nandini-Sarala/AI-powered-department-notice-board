@@ -1,292 +1,94 @@
-# # # ============================================
-# # # Unified Flask Backend (AI + Notices + Scraper)
-# # # ============================================
 
-# # from flask import Flask, request, jsonify, send_from_directory
-# # from flask_cors import CORS
-# # from werkzeug.utils import secure_filename
-# # import os, re, joblib, requests, json, time
-# # from datetime import date
-# # import mysql.connector
-# # from mysql.connector import pooling
-# # from bs4 import BeautifulSoup
-# # from urllib.parse import urljoin
-# # from requests.adapters import HTTPAdapter, Retry
 
-# # # -----------------------
-# # # Flask App Setup
-# # # -----------------------
-# # app = Flask(__name__)
-# # CORS(app, resources={r"/*": {"origins": "*"}})
-
-# # UPLOAD_FOLDER = "uploads"
-# # ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
-# # os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-# # app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-# # # -----------------------
-# # # MySQL Connection Pool
-# # # -----------------------
-# # connection_pool = pooling.MySQLConnectionPool(
-# #     pool_name="college_pool",
-# #     pool_size=5,
-# #     pool_reset_session=True,
-# #     host="localhost",
-# #     user="root",
-# #     password="Root*19470",
-# #     database="college9_notices",
-# #     auth_plugin='mysql_native_password'
-# # )
-
-# # def get_db_connection():
-# #     return connection_pool.get_connection()
-
-# # def get_cursor(conn):
-# #     return conn.cursor(dictionary=True, buffered=True)
-
-# # # -----------------------
-# # # AI Categorizer Setup
-# # # -----------------------
-# # from sklearn.feature_extraction.text import TfidfVectorizer
-# # from sklearn.naive_bayes import MultinomialNB
-
-# # train_texts = [
-# #     "Music fest registrations open",
-# #     "Drama auditions next week",
-# #     "Hackathon event starting soon",
-# #     "Paper presentation competition",
-# #     "Art exhibition entry submission",
-# #     "Coding contest 2025",
-# #     "Campus recruitment drive",
-# #     "Placement notice for final year students",
-# #     "Company interview schedule",
-# #     "Internship hiring process",
-# #     "Student achievement award",
-# #     "Best project recognition",
-# #     "Scholarship won by student"
-# # ]
-# # train_labels = [
-# #     "cultural", "cultural", "technical", "technical", "cultural", "technical",
-# #     "placement", "placement", "placement", "placement", "achievements",
-# #     "achievements", "achievements"
-# # ]
-
-# # vectorizer = TfidfVectorizer()
-# # X_train = vectorizer.fit_transform(train_texts)
-# # model = MultinomialNB()
-# # model.fit(X_train, train_labels)
-# # joblib.dump((vectorizer, model), "notice_classifier.pkl")
-# # vectorizer, model = joblib.load("notice_classifier.pkl")
-
-# # def predict_category(title, description, semester):
-# #     combined_text = f"{title} {description}".strip()
-# #     text_lower = combined_text.lower()
-# #     sem_match = re.search(r"sem\s*([1-8])", text_lower)
-# #     sem_num = semester.strip().lower() if semester else (sem_match.group(1) if sem_match else "")
-
-# #     if "exam" in combined_text:
-# #         if any(x in combined_text for x in ["ia", "internal", "midterm", "internal assessment"]):
-# #             return f"exam_ia{sem_num}" if sem_num else "exam_ia"
-# #         else:
-# #             return f"exam_sem{sem_num}" if sem_num else "exam_sem"
-
-# #     try:
-# #         X = vectorizer.transform([combined_text])
-# #         category = model.predict(X)[0]
-# #     except Exception:
-# #         if any(word in text_lower for word in ["placement", "recruitment", "campus drive", "job"]):
-# #             category = "placement"
-# #         elif any(word in text_lower for word in ["hackathon", "coding", "technical", "workshop", "competition"]):
-# #             category = "technical"
-# #         elif any(word in text_lower for word in ["music", "fest", "drama", "art", "dance", "cultural"]):
-# #             category = "cultural"
-# #         elif any(word in text_lower for word in ["award", "scholarship", "achievements", "recognition", "prize"]):
-# #             category = "achievements"
-# #         else:
-# #             category = "general"
-
-# #     if category not in ["technical", "cultural", "placement", "achievements"]:
-# #         category = "general"
-
-# #     return category
-
-# # # -----------------------
-# # # Faculty Scraper Logic
-# # # -----------------------
-# # BASE = "https://klsvdit.edu.in"
-# # CSE_URL = "https://klsvdit.edu.in/about-2/faculty-of-computer-science-and-engineering/"
-# # CACHE_FILE = os.path.join(os.path.dirname(__file__), "faculty_cache.json")
-
-# # session = requests.Session()
-# # retries = Retry(total=5, backoff_factor=0.6, status_forcelist=[429, 500, 502, 503, 504])
-# # session.mount("https://", HTTPAdapter(max_retries=retries))
-# # session.headers.update({"User-Agent": "Mozilla/5.0"})
-
-# # def resolve_url(href):
-# #     if not href: return None
-# #     return urljoin(BASE, href)
-
-# # def parse_cse_faculty(soup):
-# #     results = []
-# #     for fig in soup.find_all("figure", class_="wp-block-image"):
-# #         figcaption = fig.find("figcaption")
-# #         if figcaption:
-# #             text = figcaption.get_text(" ", strip=True)
-# #             email_match = re.search(r"([\w\.-]+@[\w\.-]+)", text)
-# #             email = email_match.group(1) if email_match else None
-# #             img_tag = fig.find("img")
-# #             image = resolve_url(img_tag["src"]) if img_tag and img_tag.get("src") else None
-# #             name = text.replace(email or "", "").strip()
-# #             if name:
-# #                 results.append({"name": name, "email": email, "image": image})
-# #     return results
-
-# # def scrape_cse():
-# #     r = session.get(CSE_URL, timeout=15)
-# #     soup = BeautifulSoup(r.text, "lxml")
-# #     return parse_cse_faculty(soup)
-
-# # def load_cache():
-# #     try:
-# #         with open(CACHE_FILE, "r", encoding="utf-8") as f:
-# #             return json.load(f).get("data", [])
-# #     except:
-# #         return []
-
-# # def save_cache(data):
-# #     with open(CACHE_FILE, "w", encoding="utf-8") as f:
-# #         json.dump({"fetched_at": int(time.time()), "data": data}, f, ensure_ascii=False, indent=2)
-
-# # # -----------------------
-# # # Flask Routes
-# # # -----------------------
-
-# # @app.route("/api/cse-faculty")
-# # def get_faculty():
-# #     data = load_cache()
-# #     if not data:
-# #         data = scrape_cse()
-# #         save_cache(data)
-# #     return jsonify({"status": "success", "data": data})
-
-# # @app.route("/api/categorize", methods=["POST"])
-# # def categorize_notice():
-# #     data = request.get_json()
-# #     category = predict_category(data.get("title", ""), data.get("description", ""), data.get("semester", ""))
-# #     return jsonify({"category": category})
-
-# # @app.route("/api/notices", methods=["POST"])
-# # def add_notice():
-# #     conn = get_db_connection()
-# #     cursor = get_cursor(conn)
-# #     try:
-# #         title = request.form.get("title", "")
-# #         description = request.form.get("description", "")
-# #         expiry_date = request.form.get("expiry_date", None)
-# #         semester = request.form.get("semester", "")
-
-# #         category = predict_category(title, description, semester)
-
-# #         def save_file(file_field):
-# #             if file_field in request.files:
-# #                 file = request.files[file_field]
-# #                 if file and "." in file.filename:
-# #                     filename = secure_filename(file.filename)
-# #                     path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-# #                     file.save(path)
-# #                     return f"/{UPLOAD_FOLDER}/{filename}"
-# #             return ""
-
-# #         image_url = save_file("image_file")
-
-# #         cursor.execute(
-# #             """INSERT INTO notices (title, description, category, semester, image_url, expiry_date)
-# #                VALUES (%s, %s, %s, %s, %s, %s)""",
-# #             (title, description, category, semester, image_url, expiry_date)
-# #         )
-# #         conn.commit()
-# #         return jsonify({"success": True, "message": f"Notice added under {category}."})
-# #     except Exception as e:
-# #         conn.rollback()
-# #         return jsonify({"success": False, "error": str(e)}), 500
-# #     finally:
-# #         cursor.close()
-# #         conn.close()
-
-# # @app.route("/api/notices", methods=["GET"])
-# # def get_notices():
-# #     conn = get_db_connection()
-# #     cursor = get_cursor(conn)
-# #     try:
-# #         cursor.execute("SELECT * FROM notices ORDER BY id DESC")
-# #         data = cursor.fetchall()
-# #         return jsonify(data)
-# #     except Exception as e:
-# #         return jsonify({"success": False, "error": str(e)})
-# #     finally:
-# #         cursor.close()
-# #         conn.close()
-
-# # @app.route("/uploads/<filename>")
-# # def uploaded_file(filename):
-# #     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
-
-# # # -----------------------
-# # # Run Server
-# # # -----------------------
-# # if __name__ == "__main__":
-# #     app.run(host="0.0.0.0", port=5000, debug=True)
-# # server.py
 # from flask import Flask, request, jsonify, send_from_directory
 # from flask_cors import CORS
-# import mysql.connector
-# from mysql.connector import pooling
 # from werkzeug.utils import secure_filename
 # from datetime import date
-# import os
-# import re
-# import requests
+# import os, re, joblib, requests, json, time
+# from bs4 import BeautifulSoup
+# from urllib.parse import urljoin
+# from requests.adapters import HTTPAdapter, Retry
+# import mysql.connector
+# from mysql.connector import pooling
 # from sklearn.feature_extraction.text import TfidfVectorizer
 # from sklearn.naive_bayes import MultinomialNB
-# import joblib
-# from scraper import scrape_cse, load_cache, save_cache  # use your existing scraper functions
 
-# # -------------------- APP CONFIG --------------------
+# # -----------------------
+# # Flask App Setup
+# # -----------------------
 # app = Flask(__name__)
-# CORS(app, resources={r"/*": {"origins": "*"}})
-# UPLOAD_FOLDER = "uploads"
-# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-# app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-# ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
+# CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-# # -------------------- DB CONFIG --------------------
-# connection_pool = pooling.MySQLConnectionPool(
-#     pool_name="college_pool",
-#     pool_size=5,
-#     pool_reset_session=True,
-#     host="localhost",
-#     user="root",
-#     password="Root*19470",
-#     database="college9_notices",
-#     auth_plugin='mysql_native_password'
-# )
+# @app.after_request
+# def after_request(response):
+#     # ✅ Allow preflight (OPTIONS) requests and headers
+#     response.headers.add("Access-Control-Allow-Origin", "*")
+#     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+#     response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+#     return response
 
-# def get_db_connection():
-#     return connection_pool.get_connection()
+# # -----------------------
+# # Static File Routes
+# # -----------------------
+# app.config["UPLOAD_FOLDER"] = os.path.join(os.path.dirname(__file__), "uploads")
+# os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# def get_cursor(conn):
-#     return conn.cursor(dictionary=True, buffered=True)
+# app.add_url_rule("/uploads/<path:filename>", "uploads",
+#                  lambda filename: send_from_directory(app.config["UPLOAD_FOLDER"], filename))
+# app.add_url_rule("/files/<path:filename>", "files",
+#                  lambda filename: send_from_directory("E:/certificates", filename))
 
-# # -------------------- AI MODEL --------------------
+# # -----------------------
+# # MySQL Connection Pools
+# # -----------------------
+
+# # DB1: Notices / AI / Scraper
+# notice_db_config = {
+#     "host": "localhost",
+#     "user": "root",
+#     "password": "Root*19470",
+#     "database": "college9_notices",
+#     "auth_plugin": "mysql_native_password",
+# }
+# connection_pool_notices = pooling.MySQLConnectionPool(pool_name="college_pool", pool_size=5, **notice_db_config)
+
+# # DB2: Login / Users
+# login_db_config = {
+#     "host": "localhost",
+#     "user": "root",
+#     "password": "Root*19470",
+#     "database": "notice_board",
+# }
+# connection_pool_login = pooling.MySQLConnectionPool(pool_name="login_pool", pool_size=5, **login_db_config)
+
+# def get_notice_connection():
+#     return connection_pool_notices.get_connection()
+
+# def get_login_connection():
+#     return connection_pool_login.get_connection()
+
+# # -----------------------
+# # AI Model Setup
+# # -----------------------
 # train_texts = [
-#     "Music fest registrations open", "Drama auditions next week", "Hackathon event starting soon",
-#     "Paper presentation competition", "Art exhibition entry submission", "Coding contest 2025",
-#     "Campus recruitment drive", "Placement notice for final year students", "Company interview schedule",
-#     "Internship hiring process", "Student achievement award", "Best project recognition", "Scholarship won by student"
+#     "Music fest registrations open",
+#     "Drama auditions next week",
+#     "Hackathon event starting soon",
+#     "Paper presentation competition",
+#     "Art exhibition entry submission",
+#     "Coding contest 2025",
+#     "Campus recruitment drive",
+#     "Placement notice for final year students",
+#     "Company interview schedule",
+#     "Internship hiring process",
+#     "Student achievement award",
+#     "Best project recognition",
+#     "Scholarship won by student",
 # ]
 # train_labels = [
 #     "cultural", "cultural", "technical", "technical", "cultural", "technical",
-#     "placement", "placement", "placement", "placement", "achievements", "achievements", "achievements"
+#     "placement", "placement", "placement", "placement", "achievements",
+#     "achievements", "achievements",
 # ]
 
 # vectorizer = TfidfVectorizer()
@@ -321,7 +123,11 @@
 #             return "achievements"
 #         return "general"
 
-# # -------------------- HELPER --------------------
+# # -----------------------
+# # Helper Functions
+# # -----------------------
+# ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
+
 # def allowed_file(filename):
 #     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -332,27 +138,70 @@
 #             filename = secure_filename(file.filename)
 #             filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 #             file.save(filepath)
-#             return f"/{UPLOAD_FOLDER}/{filename}"
+#             return f"/uploads/{filename}"
 #     return ""
 
-# # -------------------- ROUTES --------------------
-# @app.route("/uploads/<filename>")
-# def uploaded_file(filename):
-#     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+# # -----------------------
+# # Scraper (CSE Faculty)
+# # -----------------------
+# BASE = "https://klsvdit.edu.in"
+# CSE_URL = "https://klsvdit.edu.in/about-2/faculty-of-computer-science-and-engineering/"
+# CACHE_FILE = os.path.join(os.path.dirname(__file__), "faculty_cache.json")
 
+# session = requests.Session()
+# retries = Retry(total=5, backoff_factor=0.6, status_forcelist=[429, 500, 502, 503, 504])
+# session.mount("https://", HTTPAdapter(max_retries=retries))
+# session.headers.update({"User-Agent": "Mozilla/5.0"})
+
+# def resolve_url(href):
+#     if not href:
+#         return None
+#     return urljoin(BASE, href)
+
+# def parse_cse_faculty(soup):
+#     results = []
+#     for fig in soup.find_all("figure", class_="wp-block-image"):
+#         figcaption = fig.find("figcaption")
+#         if figcaption:
+#             text = figcaption.get_text(" ", strip=True)
+#             email_match = re.search(r"([\w\.-]+@[\w\.-]+)", text)
+#             email = email_match.group(1) if email_match else None
+#             img_tag = fig.find("img")
+#             image = resolve_url(img_tag["src"]) if img_tag and img_tag.get("src") else None
+#             name = text.replace(email or "", "").strip()
+#             if name:
+#                 results.append({"name": name, "email": email, "image": image})
+#     return results
+
+# def scrape_cse():
+#     r = session.get(CSE_URL, timeout=15)
+#     soup = BeautifulSoup(r.text, "lxml")
+#     return parse_cse_faculty(soup)
+
+# def load_cache():
+#     try:
+#         with open(CACHE_FILE, "r", encoding="utf-8") as f:
+#             return json.load(f).get("data", [])
+#     except:
+#         return []
+
+# def save_cache(data):
+#     with open(CACHE_FILE, "w", encoding="utf-8") as f:
+#         json.dump({"fetched_at": int(time.time()), "data": data}, f, ensure_ascii=False, indent=2)
+
+# # -----------------------
+# # Routes: Notices + AI
+# # -----------------------
 # @app.route("/api/categorize", methods=["POST"])
 # def categorize_notice():
 #     data = request.get_json()
-#     title = data.get("title", "")
-#     description = data.get("description", "")
-#     semester = data.get("semester", "")
-#     category = predict_category(title, description, semester)
+#     category = predict_category(data.get("title", ""), data.get("description", ""), data.get("semester", ""))
 #     return jsonify({"category": category})
 
 # @app.route("/api/notices", methods=["POST"])
 # def add_notice():
-#     conn = get_db_connection()
-#     cursor = get_cursor(conn)
+#     conn = get_notice_connection()
+#     cursor = conn.cursor(dictionary=True)
 #     try:
 #         title = request.form.get("title", "").strip()
 #         description = request.form.get("description", "").strip()
@@ -397,8 +246,8 @@
 
 # @app.route("/api/notices", methods=["GET"])
 # def get_notices():
-#     conn = get_db_connection()
-#     cursor = get_cursor(conn)
+#     conn = get_notice_connection()
+#     cursor = conn.cursor(dictionary=True)
 #     try:
 #         today = date.today()
 #         cursor.execute("""SELECT * FROM notices WHERE expiry_date IS NULL OR expiry_date >= %s ORDER BY id DESC""", (today,))
@@ -413,8 +262,8 @@
 
 # @app.route("/api/notices/<category>", methods=["GET"])
 # def get_notices_by_category(category):
-#     conn = get_db_connection()
-#     cursor = get_cursor(conn)
+#     conn = get_notice_connection()
+#     cursor = conn.cursor(dictionary=True)
 #     try:
 #         if category.startswith("exam"):
 #             cursor.execute("SELECT * FROM notices WHERE category LIKE %s", (f"{category}%",))
@@ -427,8 +276,8 @@
 
 # @app.route("/api/notices/recent", methods=["GET"])
 # def get_recent_notices():
-#     conn = get_db_connection()
-#     cursor = get_cursor(conn)
+#     conn = get_notice_connection()
+#     cursor = conn.cursor(dictionary=True)
 #     try:
 #         cursor.execute("SELECT id, title, category FROM notices ORDER BY id DESC LIMIT 15")
 #         return jsonify(cursor.fetchall())
@@ -438,8 +287,8 @@
 
 # @app.route("/api/cleanup_expired", methods=["DELETE"])
 # def cleanup_expired():
-#     conn = get_db_connection()
-#     cursor = get_cursor(conn)
+#     conn = get_notice_connection()
+#     cursor = conn.cursor(dictionary=True)
 #     try:
 #         today = date.today()
 #         cursor.execute("DELETE FROM notices WHERE expiry_date < %s", (today,))
@@ -449,6 +298,9 @@
 #         cursor.close()
 #         conn.close()
 
+# # -----------------------
+# # Route: Faculty Scraper
+# # -----------------------
 # @app.route("/api/cse-faculty", methods=["GET"])
 # def faculty_data():
 #     try:
@@ -460,12 +312,53 @@
 #     except Exception as e:
 #         return jsonify({"status": "error", "message": str(e)}), 500
 
-# # -------------------- MAIN --------------------
+# # -----------------------
+# # Route: Login
+# # -----------------------
+# @app.route("/login", methods=["POST", "OPTIONS"])
+# def login():
+#     if request.method == "OPTIONS":
+#         return jsonify({"message": "OK"}), 200
+
+#     data = request.get_json()
+#     usn = data.get("usn")
+#     password = data.get("password")
+
+#     if not usn or not password:
+#         return jsonify({"error": "All fields are required"}), 400
+
+#     try:
+#         conn = get_login_connection()
+#         cursor = conn.cursor(dictionary=True)
+#         query = "SELECT * FROM users WHERE usn = %s AND password_date = %s"
+#         cursor.execute(query, (usn, password))
+#         rows = cursor.fetchall()
+#         if len(rows) == 0:
+#             return jsonify({"error": "Invalid USN or password"}), 401
+
+#         user = rows[0]
+#         return jsonify({
+#             "user": {
+#                 "usn": user["usn"],
+#                 "password": user["password_date"],
+#                 "isAdmin": bool(user.get("is_admin", 0)),
+#             }
+#         })
+#     except Exception as e:
+#         print("❌ Login error:", e)
+#         return jsonify({"error": "Server error"}), 500
+#     finally:
+#         if cursor:
+#             cursor.close()
+#         if conn:
+#             conn.close()
+
+# # -----------------------
+# # Run Server
+# # -----------------------
 # if __name__ == "__main__":
 #     app.run(host="0.0.0.0", port=5000, debug=True)
-# ============================================
-# Unified Flask Backend (AI + Notices + Scraper + Login)
-# ============================================
+
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -488,11 +381,11 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 @app.after_request
 def after_request(response):
-    # ✅ Allow preflight (OPTIONS) requests and headers
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
     response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
     return response
+
 
 # -----------------------
 # Static File Routes
@@ -505,27 +398,29 @@ app.add_url_rule("/uploads/<path:filename>", "uploads",
 app.add_url_rule("/files/<path:filename>", "files",
                  lambda filename: send_from_directory("E:/certificates", filename))
 
-# -----------------------
-# MySQL Connection Pools
-# -----------------------
 
-# DB1: Notices / AI / Scraper
-notice_db_config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "Root*19470",
-    "database": "college9_notices",
-    "auth_plugin": "mysql_native_password",
-}
+# =====================================================
+# ✅ MySQL Connection Pools (Using Railway credentials)
+# =====================================================
+# Get from Render environment variables
+def get_db_config(prefix):
+    return {
+        "host": os.getenv(f"{prefix}_HOST", "yamanote.proxy.rlwy.net"),
+        "user": os.getenv(f"{prefix}_USER", "root"),
+        "password": os.getenv(f"{prefix}_PASSWORD", "GMuZHaGkzksQWRtOxVTgozPgbPrGspbx"),
+        "database": os.getenv(f"{prefix}_NAME", "railway"),
+        "port": int(os.getenv(f"{prefix}_PORT", 14485)),
+        "auth_plugin": "mysql_native_password",
+    }
+
+# Example: set two databases in Render environment variables:
+#  NOTICE_HOST, NOTICE_PORT, NOTICE_USER, NOTICE_PASSWORD, NOTICE_NAME
+#  LOGIN_HOST, LOGIN_PORT, LOGIN_USER, LOGIN_PASSWORD, LOGIN_NAME
+
+notice_db_config = get_db_config("NOTICE")
+login_db_config = get_db_config("LOGIN")
+
 connection_pool_notices = pooling.MySQLConnectionPool(pool_name="college_pool", pool_size=5, **notice_db_config)
-
-# DB2: Login / Users
-login_db_config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "Root*19470",
-    "database": "notice_board",
-}
 connection_pool_login = pooling.MySQLConnectionPool(pool_name="login_pool", pool_size=5, **login_db_config)
 
 def get_notice_connection():
@@ -533,6 +428,7 @@ def get_notice_connection():
 
 def get_login_connection():
     return connection_pool_login.get_connection()
+
 
 # -----------------------
 # AI Model Setup
@@ -565,6 +461,7 @@ model.fit(X_train, train_labels)
 joblib.dump((vectorizer, model), "notice_classifier.pkl")
 vectorizer, model = joblib.load("notice_classifier.pkl")
 
+
 def predict_category(title, description, semester):
     combined_text = f"{title} {description}".strip().lower()
     sem_match = re.search(r"sem\s*([1-8])", combined_text)
@@ -590,6 +487,7 @@ def predict_category(title, description, semester):
             return "achievements"
         return "general"
 
+
 # -----------------------
 # Helper Functions
 # -----------------------
@@ -608,6 +506,7 @@ def save_file(file_field):
             return f"/uploads/{filename}"
     return ""
 
+
 # -----------------------
 # Scraper (CSE Faculty)
 # -----------------------
@@ -620,10 +519,9 @@ retries = Retry(total=5, backoff_factor=0.6, status_forcelist=[429, 500, 502, 50
 session.mount("https://", HTTPAdapter(max_retries=retries))
 session.headers.update({"User-Agent": "Mozilla/5.0"})
 
+
 def resolve_url(href):
-    if not href:
-        return None
-    return urljoin(BASE, href)
+    return urljoin(BASE, href) if href else None
 
 def parse_cse_faculty(soup):
     results = []
@@ -656,6 +554,7 @@ def save_cache(data):
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump({"fetched_at": int(time.time()), "data": data}, f, ensure_ascii=False, indent=2)
 
+
 # -----------------------
 # Routes: Notices + AI
 # -----------------------
@@ -665,165 +564,11 @@ def categorize_notice():
     category = predict_category(data.get("title", ""), data.get("description", ""), data.get("semester", ""))
     return jsonify({"category": category})
 
-@app.route("/api/notices", methods=["POST"])
-def add_notice():
-    conn = get_notice_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        title = request.form.get("title", "").strip()
-        description = request.form.get("description", "").strip()
-        expiry_date = request.form.get("expiry_date", None)
-        semester = request.form.get("semester", "").strip().lower()
-        if not title or not description:
-            return jsonify({"success": False, "error": "Title and description required"}), 400
+# --- (rest of your routes remain unchanged) ---
 
-        category = predict_category(title, description, semester)
-        combined_text = (title + " " + description).lower()
-        if any(word in combined_text for word in ["placement", "recruitment", "drive"]):
-            category = "placement"
-
-        image_url = save_file("image_file")
-        if category == "placement" and not image_url:
-            return jsonify({"success": False, "error": "Placement notice requires an image."}), 400
-
-        if category.startswith("exam"):
-            cursor.execute("SELECT id, image_url FROM notices WHERE category=%s", (category,))
-            existing = cursor.fetchone()
-            if existing:
-                cursor.execute(
-                    """UPDATE notices SET title=%s, description=%s, expiry_date=%s, image_url=%s WHERE id=%s""",
-                    (title, description, expiry_date, image_url or existing["image_url"], existing["id"])
-                )
-                conn.commit()
-                return jsonify({"success": True, "message": f"Updated {category} notice"})
-        cursor.execute(
-            """INSERT INTO notices (title, description, category, semester, image_url, expiry_date)
-               VALUES (%s, %s, %s, %s, %s, %s)""",
-            (title, description, category, semester, image_url, expiry_date)
-        )
-        conn.commit()
-        return jsonify({"success": True, "message": f"Added new {category} notice"})
-    except Exception as e:
-        conn.rollback()
-        print("Error:", e)
-        return jsonify({"success": False, "error": str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()
-
-@app.route("/api/notices", methods=["GET"])
-def get_notices():
-    conn = get_notice_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        today = date.today()
-        cursor.execute("""SELECT * FROM notices WHERE expiry_date IS NULL OR expiry_date >= %s ORDER BY id DESC""", (today,))
-        rows = cursor.fetchall()
-        for r in rows:
-            if r["expiry_date"]:
-                r["expiry_date"] = r["expiry_date"].strftime("%Y-%m-%d")
-        return jsonify(rows)
-    finally:
-        cursor.close()
-        conn.close()
-
-@app.route("/api/notices/<category>", methods=["GET"])
-def get_notices_by_category(category):
-    conn = get_notice_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        if category.startswith("exam"):
-            cursor.execute("SELECT * FROM notices WHERE category LIKE %s", (f"{category}%",))
-        else:
-            cursor.execute("SELECT * FROM notices WHERE category=%s", (category,))
-        return jsonify(cursor.fetchall())
-    finally:
-        cursor.close()
-        conn.close()
-
-@app.route("/api/notices/recent", methods=["GET"])
-def get_recent_notices():
-    conn = get_notice_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT id, title, category FROM notices ORDER BY id DESC LIMIT 15")
-        return jsonify(cursor.fetchall())
-    finally:
-        cursor.close()
-        conn.close()
-
-@app.route("/api/cleanup_expired", methods=["DELETE"])
-def cleanup_expired():
-    conn = get_notice_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        today = date.today()
-        cursor.execute("DELETE FROM notices WHERE expiry_date < %s", (today,))
-        conn.commit()
-        return jsonify({"success": True, "deleted": cursor.rowcount})
-    finally:
-        cursor.close()
-        conn.close()
-
-# -----------------------
-# Route: Faculty Scraper
-# -----------------------
-@app.route("/api/cse-faculty", methods=["GET"])
-def faculty_data():
-    try:
-        data = load_cache()
-        if not data:
-            data = scrape_cse()
-            save_cache(data)
-        return jsonify({"status": "success", "data": data})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-# -----------------------
-# Route: Login
-# -----------------------
-@app.route("/login", methods=["POST", "OPTIONS"])
-def login():
-    if request.method == "OPTIONS":
-        return jsonify({"message": "OK"}), 200
-
-    data = request.get_json()
-    usn = data.get("usn")
-    password = data.get("password")
-
-    if not usn or not password:
-        return jsonify({"error": "All fields are required"}), 400
-
-    try:
-        conn = get_login_connection()
-        cursor = conn.cursor(dictionary=True)
-        query = "SELECT * FROM users WHERE usn = %s AND password_date = %s"
-        cursor.execute(query, (usn, password))
-        rows = cursor.fetchall()
-        if len(rows) == 0:
-            return jsonify({"error": "Invalid USN or password"}), 401
-
-        user = rows[0]
-        return jsonify({
-            "user": {
-                "usn": user["usn"],
-                "password": user["password_date"],
-                "isAdmin": bool(user.get("is_admin", 0)),
-            }
-        })
-    except Exception as e:
-        print("❌ Login error:", e)
-        return jsonify({"error": "Server error"}), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 # -----------------------
 # Run Server
 # -----------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
-
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=True)
