@@ -65,7 +65,7 @@
   <script>
     async function loadFaculty() {
       try {
-        const res = await fetch("https://ai-powered-department-notice-board.onrender.com/api/cse-faculty");
+        const res = await fetch("http://127.0.0.1:5000/api/cse-faculty");
         const data = await res.json();
 
         if (data.status !== "success") {
